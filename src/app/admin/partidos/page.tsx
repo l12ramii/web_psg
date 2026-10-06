@@ -7,6 +7,7 @@ import {
   Shield,
   CheckCircle2,
   Calendar,
+  MapPin,
 } from "lucide-react";
 import { getMatches } from "@/lib/data";
 import { Button } from "@/components/ui/Button";
@@ -64,8 +65,14 @@ export default async function AdminPartidosPage() {
                       {getCompetitionLabel(match.competition)}
                     </Badge>
                     <span className="font-display text-xs font-bold uppercase text-secondary">
-                      {match.is_home ? "Local (Campo PSG)" : "Visitante"}
+                      {match.is_home ? "Local" : "Visitante"}
                     </span>
+                    {match.field?.name && (
+                      <span className="inline-flex items-center gap-1 rounded bg-surface-elevated px-2 py-0.5 font-display text-[11px] font-bold uppercase text-accent-cyan">
+                        <MapPin className="h-3 w-3" />
+                        {match.field.name}
+                      </span>
+                    )}
                   </div>
 
                   <h3 className="truncate font-display text-xl font-bold uppercase tracking-wide text-primary sm:text-2xl">

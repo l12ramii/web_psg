@@ -8,6 +8,7 @@ import {
   CalendarCheck,
   Users,
   Shield,
+  MapPin,
   LogOut,
   Flame,
   Menu,
@@ -28,6 +29,7 @@ export function AdminNav() {
     { href: "/admin/partidos", label: "Partidos & Actas", icon: CalendarCheck },
     { href: "/admin/jugadores", label: "Plantilla", icon: Users },
     { href: "/admin/rivales", label: "Rivales", icon: Shield },
+    { href: "/admin/campos", label: "Campos", icon: MapPin },
   ];
 
   const handleLogout = async () => {

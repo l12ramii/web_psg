@@ -2,6 +2,7 @@ import { createClient } from "./supabase/client";
 import {
   Player,
   Rival,
+  Field,
   MatchWithRival,
   PlayerStatsSummary,
   MatchDetail,
@@ -11,6 +12,43 @@ import { sortPlayersByPositionAndDorsal } from "./utils";
 // ==========================================
 // QUERIES (Lecturas desde Supabase)
 // ==========================================
+
+export async function getFields(): Promise<Field[]> {
+  try {
+    const supabase = createClient();
+    const { data, error } = await (supabase.from("fields") as any)
+      .select("*")
+      .order("name", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching fields from Supabase:", error.message);
+      return [];
+    }
+    return (data as Field[]) || [];
+  } catch (err) {
+    console.error("Unexpected error in getFields:", err);
+    return [];
+  }
+}
+
+export async function getFieldById(id: string): Promise<Field | null> {
+  try {
+    const supabase = createClient();
+    const { data, error } = await (supabase.from("fields") as any)
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      console.error("Error fetching field by id from Supabase:", error.message);
+      return null;
+    }
+    return data as Field;
+  } catch (err) {
+    console.error("Unexpected error in getFieldById:", err);
+    return null;
+  }
+}
 
 export async function getRivals(): Promise<Rival[]> {
   try {
@@ -94,7 +132,7 @@ export async function getMatches(): Promise<MatchWithRival[]> {
   try {
     const supabase = createClient();
     const { data, error } = await (supabase.from("matches") as any)
-      .select("*, rival:rivals(*)")
+      .select("*, rival:rivals(*), field:fields(*)")
       .order("match_date", { ascending: true });
 
     if (error) {
@@ -147,7 +185,7 @@ export async function getMatchById(id: string): Promise<MatchDetail | null> {
   try {
     const supabase = createClient();
     const { data: matchData, error: matchError } = await (supabase.from("matches") as any)
-      .select("*, rival:rivals(*)")
+      .select("*, rival:rivals(*), field:fields(*)")
       .eq("id", id)
       .single();
 
@@ -316,8 +354,70 @@ export async function updatePlayer(
   return updatedPlayer as Player;
 }
 
+export async function addField(data: {
+  name: string;
+  address?: string | null;
+  maps_url?: string | null;
+}): Promise<Field> {
+  const supabase = createClient();
+  const { data: newField, error } = await (supabase.from("fields") as any)
+    .insert({
+      name: data.name,
+      address: data.address || null,
+      maps_url: data.maps_url || null,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error adding field to Supabase:", error.message);
+    throw error;
+  }
+  return newField as Field;
+}
+
+export async function updateField(
+  id: string,
+  data: Partial<Field>
+): Promise<Field | null> {
+  const supabase = createClient();
+  const { data: updatedField, error } = await (supabase.from("fields") as any)
+    .update(data)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error updating field in Supabase:", error.message);
+    throw error;
+  }
+  return updatedField as Field;
+}
+
+export async function deleteField(id: string): Promise<boolean> {
+  const supabase = createClient();
+  const { error } = await (supabase.from("fields") as any)
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error("Error deleting field in Supabase:", error.message);
+    if (
+      error.code === "23503" ||
+      error.message?.includes("violates foreign key constraint")
+    ) {
+      throw new Error(
+        "No se puede eliminar este campo porque está asignado a partidos en el calendario."
+      );
+    }
+    throw error;
+  }
+  return true;
+}
+
 export async function addMatch(data: {
   rival_id: string;
+  field_id?: string | null;
   is_home: boolean;
   match_date: string;
   competition: "liga" | "copa" | "amistoso";
@@ -326,11 +426,12 @@ export async function addMatch(data: {
   const { data: newMatch, error } = await (supabase.from("matches") as any)
     .insert({
       rival_id: data.rival_id,
+      field_id: data.field_id || null,
       is_home: data.is_home,
       match_date: data.match_date,
       competition: data.competition,
     })
-    .select("*, rival:rivals(*)")
+    .select("*, rival:rivals(*), field:fields(*)")
     .single();
 
   if (error) {

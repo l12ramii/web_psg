@@ -219,9 +219,16 @@ export default async function HomePage() {
                     </p>
                     <p className="mt-1 text-xs text-secondary">
                       Sede:{" "}
-                      {nextMatch.is_home
-                        ? "Campo Principal PSG F7"
-                        : "Instalaciones del Rival"}
+                      {nextMatch.field?.name ? (
+                        <span className="text-primary font-semibold">
+                          {nextMatch.field.name}
+                          {nextMatch.field.address ? ` (${nextMatch.field.address})` : ""}
+                        </span>
+                      ) : nextMatch.is_home ? (
+                        "Campo Principal PSG F7"
+                      ) : (
+                        "Instalaciones del Rival"
+                      )}
                     </p>
                   </div>
 

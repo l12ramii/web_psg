@@ -12,16 +12,19 @@ import {
   ChevronDown,
   Check,
   Loader2,
+  MapPin,
 } from "lucide-react";
-import { getRivals, addMatch } from "@/lib/data";
-import { Rival } from "@/lib/supabase/types";
+import { getRivals, getFields, addMatch } from "@/lib/data";
+import { Rival, Field } from "@/lib/supabase/types";
 import { Button } from "@/components/ui/Button";
 import { RivalShield } from "@/components/ui/RivalShield";
 
 export default function NuevoPartidoPage() {
   const router = useRouter();
   const [rivals, setRivals] = useState<Rival[]>([]);
+  const [fields, setFields] = useState<Field[]>([]);
   const [rivalId, setRivalId] = useState<string>("");
+  const [fieldId, setFieldId] = useState<string>("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isHome, setIsHome] = useState<boolean>(true);
   const [matchDate, setMatchDate] = useState<string>("");
@@ -30,6 +33,7 @@ export default function NuevoPartidoPage() {
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loadingRivals, setLoadingRivals] = useState<boolean>(true);
+  const [loadingFields, setLoadingFields] = useState<boolean>(true);
 
   useEffect(() => {
     const d = new Date();
@@ -45,9 +49,19 @@ export default function NuevoPartidoPage() {
       .finally(() => {
         setLoadingRivals(false);
       });
+
+    getFields()
+      .then((data) => {
+        setFields(data);
+        if (data.length > 0) setFieldId(data[0].id);
+      })
+      .finally(() => {
+        setLoadingFields(false);
+      });
   }, []);
 
   const selectedRival = rivals.find((r) => r.id === rivalId);
+  const selectedField = fields.find((f) => f.id === fieldId);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,6 +74,7 @@ export default function NuevoPartidoPage() {
     try {
       await addMatch({
         rival_id: rivalId,
+        field_id: fieldId || null,
         is_home: isHome,
         match_date: new Date(matchDate).toISOString(),
         competition,
@@ -193,6 +208,52 @@ export default function NuevoPartidoPage() {
                   </>
                 )}
               </>
+            )}
+          </div>
+
+          {/* Campo de Juego / Sede Selector */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="font-display text-xs font-bold uppercase tracking-wider text-secondary flex items-center gap-1.5">
+                <MapPin className="h-3.5 w-3.5 text-accent-cyan" />
+                Campo de Juego / Sede
+              </label>
+              <Link
+                href="/admin/campos"
+                className="flex items-center gap-1 font-display text-xs font-bold uppercase tracking-wider text-accent-cyan hover:underline"
+              >
+                <Plus className="h-3.5 w-3.5" /> Gestionar campos
+              </Link>
+            </div>
+
+            {loadingFields ? (
+              <div className="flex items-center gap-2 p-3 text-xs text-secondary">
+                <Loader2 className="h-4 w-4 animate-spin text-accent-cyan" />
+                <span>Cargando campos...</span>
+              </div>
+            ) : fields.length === 0 ? (
+              <div className="rounded-xl border border-white/10 bg-surface-elevated/40 p-3 text-xs text-secondary flex items-center justify-between">
+                <span>No hay campos creados todavía.</span>
+                <Link
+                  href="/admin/campos"
+                  className="font-bold text-accent-cyan underline"
+                >
+                  Crear campo
+                </Link>
+              </div>
+            ) : (
+              <select
+                value={fieldId}
+                onChange={(e) => setFieldId(e.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-surface-elevated px-4 py-3 text-sm font-medium text-primary focus-ring focus:border-accent-cyan focus:outline-none"
+              >
+                <option value="">-- Sin campo asignado --</option>
+                {fields.map((field) => (
+                  <option key={field.id} value={field.id}>
+                    {field.name} {field.address ? `(${field.address})` : ""}
+                  </option>
+                ))}
+              </select>
             )}
           </div>
 

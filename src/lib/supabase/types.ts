@@ -75,10 +75,35 @@ export interface Database {
         };
         Relationships: [];
       };
+      fields: {
+        Row: {
+          id: string;
+          name: string;
+          address: string | null;
+          maps_url: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          address?: string | null;
+          maps_url?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          address?: string | null;
+          maps_url?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       matches: {
         Row: {
           id: string;
           rival_id: string;
+          field_id: string | null;
           is_home: boolean;
           match_date: string;
           competition: CompetitionType;
@@ -91,6 +116,7 @@ export interface Database {
         Insert: {
           id?: string;
           rival_id: string;
+          field_id?: string | null;
           is_home?: boolean;
           match_date: string;
           competition?: CompetitionType;
@@ -102,6 +128,7 @@ export interface Database {
         Update: {
           id?: string;
           rival_id?: string;
+          field_id?: string | null;
           is_home?: boolean;
           match_date?: string;
           competition?: CompetitionType;
@@ -116,6 +143,13 @@ export interface Database {
             columns: ["rival_id"];
             isOneToOne: false;
             referencedRelation: "rivals";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "matches_field_id_fkey";
+            columns: ["field_id"];
+            isOneToOne: false;
+            referencedRelation: "fields";
             referencedColumns: ["id"];
           }
         ];
@@ -209,6 +243,7 @@ export interface Database {
 
 export type Player = Database["public"]["Tables"]["players"]["Row"];
 export type Rival = Database["public"]["Tables"]["rivals"]["Row"];
+export type Field = Database["public"]["Tables"]["fields"]["Row"];
 export type Match = Database["public"]["Tables"]["matches"]["Row"];
 export type MatchPlayerStat =
   Database["public"]["Tables"]["match_player_stats"]["Row"];
@@ -217,6 +252,7 @@ export type PlayerStatsSummary =
 
 export interface MatchWithRival extends Match {
   rival: Rival;
+  field?: Field | null;
 }
 
 export interface MatchDetail extends MatchWithRival {

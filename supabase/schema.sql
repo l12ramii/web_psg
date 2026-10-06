@@ -36,10 +36,20 @@ CREATE TABLE IF NOT EXISTS rivals (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 4. Tabla de Partidos
+-- 4. Tabla de Campos de Juego (Instalaciones / Sedes)
+CREATE TABLE IF NOT EXISTS fields (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    address TEXT,
+    maps_url TEXT,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 5. Tabla de Partidos
 CREATE TABLE IF NOT EXISTS matches (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     rival_id UUID NOT NULL REFERENCES rivals(id) ON DELETE RESTRICT,
+    field_id UUID REFERENCES fields(id) ON DELETE SET NULL,
     is_home BOOLEAN NOT NULL DEFAULT true,
     match_date TIMESTAMPTZ NOT NULL,
     competition competition_type NOT NULL DEFAULT 'liga',
@@ -90,6 +100,7 @@ GROUP BY p.id;
 -- 7. Seguridad: Habilitar RLS en todas las tablas
 ALTER TABLE players ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rivals ENABLE ROW LEVEL SECURITY;
+ALTER TABLE fields ENABLE ROW LEVEL SECURITY;
 ALTER TABLE matches ENABLE ROW LEVEL SECURITY;
 ALTER TABLE match_player_stats ENABLE ROW LEVEL SECURITY;
 
@@ -98,6 +109,9 @@ CREATE POLICY "Acceso público de lectura a jugadores" ON players
     FOR SELECT USING (true);
 
 CREATE POLICY "Acceso público de lectura a rivales" ON rivals
+    FOR SELECT USING (true);
+
+CREATE POLICY "Acceso público de lectura a campos" ON fields
     FOR SELECT USING (true);
 
 CREATE POLICY "Acceso público de lectura a partidos" ON matches
@@ -111,6 +125,9 @@ CREATE POLICY "Escritura autenticada para jugadores" ON players
     FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
 CREATE POLICY "Escritura autenticada para rivales" ON rivals
+    FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+CREATE POLICY "Escritura autenticada para campos" ON fields
     FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
 CREATE POLICY "Escritura autenticada para partidos" ON matches

@@ -11,6 +11,9 @@ import {
   Award,
   Sparkles,
   FileSpreadsheet,
+  MapPin,
+  ExternalLink,
+  Navigation,
 } from "lucide-react";
 import { getMatchById } from "@/lib/data";
 import { Badge } from "@/components/ui/Badge";
@@ -81,13 +84,19 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
       {/* Main Match Header Card */}
       <div className="relative space-y-6 overflow-hidden rounded-xl border border-white/10 bg-surface p-6 text-center shadow-xl inner-light sm:p-10">
         <div className="flex flex-col items-center justify-between gap-4 border-b border-white/10 pb-4 sm:flex-row">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Badge variant={match.competition} dot>
               {getCompetitionLabel(match.competition)}
             </Badge>
             <span className="font-display text-xs font-bold uppercase text-secondary">
-              {match.is_home ? "Local (Campo PSG)" : "Visitante"}
+              {match.is_home ? "Local" : "Visitante"}
             </span>
+            {match.field?.name && (
+              <span className="inline-flex items-center gap-1 rounded bg-surface-elevated px-2 py-0.5 font-display text-[10px] font-bold uppercase text-accent-cyan">
+                <MapPin className="h-3 w-3" />
+                {match.field.name}
+              </span>
+            )}
           </div>
 
           <span className="font-display text-xs font-bold uppercase tracking-wider text-accent-cyan capitalize">
@@ -165,6 +174,38 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
           </div>
         )}
       </div>
+
+      {/* Sede / Field Venue Card */}
+      {match.field && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border border-white/10 bg-surface p-4 sm:p-5 inner-light">
+          <div className="flex items-center gap-3.5 min-w-0 w-full sm:w-auto">
+            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-accent-cyan/30 bg-surface-elevated text-accent-cyan shadow-glow-subtle">
+              <MapPin className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <span className="block font-display text-base font-bold uppercase text-primary truncate">
+                Sede: {match.field.name}
+              </span>
+              <span className="block text-xs text-secondary truncate">
+                {match.field.address || "Instalaciones deportivas"}
+              </span>
+            </div>
+          </div>
+
+          {match.field.maps_url && (
+            <a
+              href={match.field.maps_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-accent-cyan/40 bg-accent-cyan/15 px-4 py-2.5 font-display text-xs font-bold uppercase tracking-wider text-accent-cyan transition-all hover:bg-accent-cyan hover:text-black focus-ring flex-shrink-0"
+            >
+              <Navigation className="h-3.5 w-3.5" />
+              <span>Abrir en Google Maps</span>
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          )}
+        </div>
+      )}
 
       {/* Match Events & Stats Section */}
       {match.is_finished ? (

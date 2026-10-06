@@ -11,7 +11,14 @@ INSERT INTO rivals (id, name, shield_url) VALUES
 ('11111111-1111-1111-1111-111111111105', 'Recreativo Olivo', 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=128&auto=format&fit=crop&q=80')
 ON CONFLICT (id) DO NOTHING;
 
--- 2. Insertar Plantilla PSG F7
+-- 2. Insertar Campos de Juego
+INSERT INTO fields (id, name, address, maps_url) VALUES
+('44444444-4444-4444-4444-444444444401', 'Campo Municipal El Ferial', 'Calle de los Deportes 14, Madrid', 'https://maps.google.com/?q=Campo+Municipal+El+Ferial'),
+('44444444-4444-4444-4444-444444444402', 'Polideportivo San Juan', 'Av. de la Paz s/n, Madrid', 'https://maps.google.com/?q=Polideportivo+San+Juan'),
+('44444444-4444-4444-4444-444444444403', 'Complejo Deportivo Las Palmeras', 'Calle Olivo 22, Madrid', 'https://maps.google.com/?q=Complejo+Deportivo+Las+Palmeras')
+ON CONFLICT (id) DO NOTHING;
+
+-- 3. Insertar Plantilla PSG F7
 -- Porteros
 INSERT INTO players (id, first_name, last_name, nickname, dorsal, position, photo_url, is_active) VALUES
 ('22222222-2222-2222-2222-222222222201', 'Álvaro', 'Ramos', 'El Muro', 1, 'portero', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80', true),
@@ -37,28 +44,28 @@ INSERT INTO players (id, first_name, last_name, nickname, dorsal, position, phot
 ('22222222-2222-2222-2222-222222222213', 'Manuel', 'Torres', 'Manu', 0, 'utillero', 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=300&auto=format&fit=crop&q=80', true)
 ON CONFLICT (id) DO NOTHING;
 
--- 3. Insertar Partidos
+-- 4. Insertar Partidos
 -- Partido 1 (Finalizado: Victoria PSG 4-2)
-INSERT INTO matches (id, rival_id, is_home, match_date, competition, psg_score, rival_score) VALUES
-('33333333-3333-3333-3333-333333333301', '11111111-1111-1111-1111-111111111101', true, now() - INTERVAL '14 days', 'liga', 4, 2)
+INSERT INTO matches (id, rival_id, field_id, is_home, match_date, competition, psg_score, rival_score) VALUES
+('33333333-3333-3333-3333-333333333301', '11111111-1111-1111-1111-111111111101', '44444444-4444-4444-4444-444444444401', true, now() - INTERVAL '14 days', 'liga', 4, 2)
 ON CONFLICT (id) DO NOTHING;
 
 -- Partido 2 (Finalizado: Victoria PSG 3-0 - Portería a Cero)
-INSERT INTO matches (id, rival_id, is_home, match_date, competition, psg_score, rival_score) VALUES
-('33333333-3333-3333-3333-333333333302', '11111111-1111-1111-1111-111111111102', false, now() - INTERVAL '7 days', 'liga', 3, 0)
+INSERT INTO matches (id, rival_id, field_id, is_home, match_date, competition, psg_score, rival_score) VALUES
+('33333333-3333-3333-3333-333333333302', '11111111-1111-1111-1111-111111111102', '44444444-4444-4444-4444-444444444402', false, now() - INTERVAL '7 days', 'liga', 3, 0)
 ON CONFLICT (id) DO NOTHING;
 
 -- Partido 3 (Próximo Partido)
-INSERT INTO matches (id, rival_id, is_home, match_date, competition, psg_score, rival_score) VALUES
-('33333333-3333-3333-3333-333333333303', '11111111-1111-1111-1111-111111111103', true, now() + INTERVAL '3 days 4 hours', 'liga', NULL, NULL)
+INSERT INTO matches (id, rival_id, field_id, is_home, match_date, competition, psg_score, rival_score) VALUES
+('33333333-3333-3333-3333-333333333303', '11111111-1111-1111-1111-111111111103', '44444444-4444-4444-4444-444444444401', true, now() + INTERVAL '3 days 4 hours', 'liga', NULL, NULL)
 ON CONFLICT (id) DO NOTHING;
 
 -- Partido 4 (Futuro Partido - Copa)
-INSERT INTO matches (id, rival_id, is_home, match_date, competition, psg_score, rival_score) VALUES
-('33333333-3333-3333-3333-333333333304', '11111111-1111-1111-1111-111111111104', false, now() + INTERVAL '10 days', 'copa', NULL, NULL)
+INSERT INTO matches (id, rival_id, field_id, is_home, match_date, competition, psg_score, rival_score) VALUES
+('33333333-3333-3333-3333-333333333304', '11111111-1111-1111-1111-111111111104', '44444444-4444-4444-4444-444444444403', false, now() + INTERVAL '10 days', 'copa', NULL, NULL)
 ON CONFLICT (id) DO NOTHING;
 
--- 4. Insertar Actas de Partidos Finalizados
+-- 5. Insertar Actas de Partidos Finalizados
 -- Acta Partido 1 (4-2)
 INSERT INTO match_player_stats (match_id, player_id, played, goals, assists, yellow_cards, red_cards, clean_sheet) VALUES
 ('33333333-3333-3333-3333-333333333301', '22222222-2222-2222-2222-222222222201', true, 0, 0, 0, 0, false), -- Portero

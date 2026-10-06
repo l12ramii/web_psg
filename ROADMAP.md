@@ -75,3 +75,25 @@ Este documento detalla las tareas paso a paso para completar el desarrollo de la
   - [x] Verificar el build exitoso de producción y el funcionamiento del despliegue continuo tras cada push.
 - [ ] **Dominio (Futuro)**
   - [ ] Adquirir dominio personalizado y configurar DNS en Vercel.
+
+## Fase 5: Nuevas Funcionalidades (Campos, Competiciones, Estadísticas y Redes)
+- [x] **1. CRUD de Campos de Fútbol (`fields`)**
+  - [x] Crear esquema SQL: Tabla `fields` con RLS y políticas.
+  - [x] Actualizar base de datos y tipos de TypeScript en frontend.
+  - [x] Crear sección `/admin/campos` (Listado, Alta, Edición, Borrado).
+  - [x] Modificar tabla `matches` añadiendo `field_id`.
+  - [x] Adaptar selector en `/admin/partidos/nuevo` y visor público de partidos.
+- [ ] **2. CRUD de Competiciones (`competitions`)**
+  - [ ] Crear esquema SQL: Tabla `competitions` (`id`, `name`, `type`) y migración de la tabla `matches`.
+  - [ ] Actualizar base de datos y tipos en frontend.
+  - [ ] Crear sección `/admin/competiciones` (CRUD).
+  - [ ] Adaptar creación y edición de partidos para seleccionar la competición real.
+- [ ] **3. Página Pública y Filtro de Estadísticas**
+  - [ ] Crear página `/estadisticas` con tablas (Pichichi, Asistencias, Zamora, Tarjetas).
+  - [ ] Desarrollar selector global de competición (Todas, Amistosos, Ligas...).
+  - [ ] Integrar filtro dinámico en `/estadisticas`, la página `/plantilla` y los líderes de la Home.
+  - [ ] Modificar vistas SQL o funciones RPC de Supabase para calcular las estadísticas agrupadas y filtrables por competición.
+- [ ] **4. Integración de Redes Sociales**
+  - [ ] Añadir archivo de configuración/constantes para IG, Twitch y YouTube.
+  - [ ] Incorporar enlaces con iconos en `Navbar` y `Footer`.
+  - [ ] Diseñar y añadir un bloque/banner destacado en la página de inicio (Home).

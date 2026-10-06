@@ -103,19 +103,25 @@ export function MatchCard({ match, showActaButton = true }: MatchCardProps) {
       >
         {/* Header Bar */}
         <div className="mb-4 flex items-center justify-between gap-2 border-b border-white/10 pb-3">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 min-w-0">
             <Badge variant={match.competition} dot>
               {getCompetitionLabel(match.competition)}
             </Badge>
             <span className="font-display text-xs font-bold uppercase tracking-wider text-secondary">
-              {match.is_home ? "Local (Campo PSG)" : "Visitante"}
+              {match.is_home ? "Local" : "Visitante"}
             </span>
+            {match.field?.name && (
+              <span className="inline-flex items-center gap-1 rounded bg-surface-elevated px-2 py-0.5 font-display text-[10px] font-bold uppercase text-accent-cyan truncate max-w-[140px] sm:max-w-none">
+                <MapPin className="h-3 w-3 flex-shrink-0" />
+                <span className="truncate">{match.field.name}</span>
+              </span>
+            )}
           </div>
 
           {match.is_finished ? (
             <span
               className={cn(
-                "rounded-full border px-2.5 py-0.5 font-display text-[10px] font-bold uppercase tracking-widest",
+                "rounded-full border px-2.5 py-0.5 font-display text-[10px] font-bold uppercase tracking-widest flex-shrink-0",
                 isPsgWin &&
                   "border-success/40 bg-success/15 text-success shadow-glow-emerald",
                 isPsgDraw &&
@@ -127,7 +133,7 @@ export function MatchCard({ match, showActaButton = true }: MatchCardProps) {
               {isPsgWin ? "Victoria PSG" : isPsgDraw ? "Empate" : "Derrota"}
             </span>
           ) : (
-            <span className="rounded-full border border-accent-cyan/40 bg-accent-cyan/15 px-2.5 py-0.5 font-display text-[10px] font-bold uppercase tracking-widest text-accent-cyan shadow-glow-subtle">
+            <span className="rounded-full border border-accent-cyan/40 bg-accent-cyan/15 px-2.5 py-0.5 font-display text-[10px] font-bold uppercase tracking-widest text-accent-cyan shadow-glow-subtle flex-shrink-0">
               Próxima Jornada
             </span>
           )}
@@ -324,6 +330,27 @@ export function MatchCard({ match, showActaButton = true }: MatchCardProps) {
                 </span>
               </div>
             </div>
+
+            {/* Field / Sede location banner in modal */}
+            {(matchDetail?.field || match.field) && (
+              <div className="mt-2 flex flex-wrap items-center justify-center gap-2 border-t border-white/10 pt-2.5 text-xs text-secondary">
+                <MapPin className="h-3.5 w-3.5 text-accent-cyan flex-shrink-0" />
+                <span className="font-bold text-primary">{(matchDetail?.field || match.field)?.name}</span>
+                {(matchDetail?.field || match.field)?.address && (
+                  <span className="text-secondary text-[11px]">· {(matchDetail?.field || match.field)?.address}</span>
+                )}
+                {(matchDetail?.field || match.field)?.maps_url && (
+                  <a
+                    href={(matchDetail?.field || match.field)!.maps_url!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 font-bold text-accent-cyan hover:underline text-[11px] ml-1"
+                  >
+                    <ExternalLink className="h-3 w-3" /> Google Maps
+                  </a>
+                )}
+              </div>
+            )}
           </div>
 
           {/* If Match is finished: Show detailed events & sheet */}

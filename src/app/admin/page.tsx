@@ -14,7 +14,7 @@ import {
   Clock,
   MapPin,
 } from "lucide-react";
-import { getMatches, getPlayers, getRivals, getFields } from "@/lib/data";
+import { getMatches, getPlayers, getRivals, getFields, getCompetitions } from "@/lib/data";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { formatShortDate, getCompetitionLabel } from "@/lib/utils";
@@ -27,6 +27,7 @@ export default async function AdminDashboardPage() {
   const players = await getPlayers();
   const rivals = await getRivals();
   const fields = await getFields();
+  const competitions = await getCompetitions();
 
   const finishedMatches = matches.filter((m) => m.is_finished);
   const pendingMatches = matches.filter((m) => !m.is_finished);
@@ -44,7 +45,7 @@ export default async function AdminDashboardPage() {
             <span className="text-glow-subtle text-accent-cyan">CM</span>
           </h1>
           <p className="max-w-xl text-xs font-medium text-secondary sm:text-sm">
-            Registra los resultados de las jornadas, gestiona los campos y rivales, y
+            Registra los resultados de las jornadas, gestiona los campos, rivales y competiciones, y
             mantén las estadísticas de la plantilla al día en segundos.
           </p>
         </div>
@@ -59,7 +60,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Metric Counters Grid */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
         <div className="rounded-xl border border-white/10 bg-surface p-5 inner-light">
           <div className="flex items-center justify-between">
             <span className="font-display text-[11px] font-bold uppercase tracking-wider text-secondary">
@@ -80,7 +81,7 @@ export default async function AdminDashboardPage() {
             <span className="font-display text-[11px] font-bold uppercase tracking-wider text-secondary">
               Rivales
             </span>
-            <Trophy className="h-5 w-5 text-warning" />
+            <ShieldAlert className="h-5 w-5 text-warning" />
           </div>
           <p className="mt-2 font-display text-4xl font-black text-warning">
             {rivals.length}
@@ -108,6 +109,21 @@ export default async function AdminDashboardPage() {
         <div className="rounded-xl border border-white/10 bg-surface p-5 inner-light">
           <div className="flex items-center justify-between">
             <span className="font-display text-[11px] font-bold uppercase tracking-wider text-secondary">
+              Competiciones
+            </span>
+            <Trophy className="h-5 w-5 text-warning" />
+          </div>
+          <p className="mt-2 font-display text-4xl font-black text-warning">
+            {competitions.length}
+          </p>
+          <span className="mt-1 block font-display text-xs font-bold uppercase text-warning truncate">
+            Torneos
+          </span>
+        </div>
+
+        <div className="rounded-xl border border-white/10 bg-surface p-5 inner-light">
+          <div className="flex items-center justify-between">
+            <span className="font-display text-[11px] font-bold uppercase tracking-wider text-secondary">
               Actas Cerradas
             </span>
             <CalendarCheck className="h-5 w-5 text-success" />
@@ -120,7 +136,7 @@ export default async function AdminDashboardPage() {
           </span>
         </div>
 
-        <div className="rounded-xl border border-white/10 bg-surface p-5 inner-light col-span-2 sm:col-span-1">
+        <div className="rounded-xl border border-white/10 bg-surface p-5 inner-light">
           <div className="flex items-center justify-between">
             <span className="font-display text-[11px] font-bold uppercase tracking-wider text-secondary">
               Por Disputar
@@ -137,7 +153,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Quick Access Modules */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <Link href="/admin/partidos/nuevo" className="group">
           <div className="h-full space-y-3 rounded-xl border border-white/10 bg-surface p-5 inner-light transition-all duration-200 ease-out hover:-translate-y-1 hover:border-accent-cyan/50 hover:shadow-glow-subtle">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent-cyan/15 text-accent-cyan transition-transform group-hover:scale-110">
@@ -147,7 +163,7 @@ export default async function AdminDashboardPage() {
               Programar Partido
             </h3>
             <p className="text-xs font-medium leading-relaxed text-secondary">
-              Fija fecha, hora, campo, rival y competición.
+              Fija fecha, hora, campo, rival y torneo.
             </p>
           </div>
         </Link>
@@ -183,7 +199,7 @@ export default async function AdminDashboardPage() {
         <Link href="/admin/rivales" className="group">
           <div className="h-full space-y-3 rounded-xl border border-white/10 bg-surface p-5 inner-light transition-all duration-200 ease-out hover:-translate-y-1 hover:border-accent-cyan/50 hover:shadow-glow-subtle">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent-blue/15 text-accent-blue transition-transform group-hover:scale-110">
-              <Trophy className="h-5 w-5" />
+              <ShieldAlert className="h-5 w-5" />
             </div>
             <h3 className="font-display text-lg font-bold uppercase tracking-wide text-primary">
               Rivales
@@ -204,6 +220,20 @@ export default async function AdminDashboardPage() {
             </h3>
             <p className="text-xs font-medium leading-relaxed text-secondary">
               Sedes, polideportivos y ubicaciones Maps.
+            </p>
+          </div>
+        </Link>
+
+        <Link href="/admin/competiciones" className="group">
+          <div className="h-full space-y-3 rounded-xl border border-white/10 bg-surface p-5 inner-light transition-all duration-200 ease-out hover:-translate-y-1 hover:border-accent-cyan/50 hover:shadow-glow-subtle">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-warning/15 text-warning transition-transform group-hover:scale-110">
+              <Trophy className="h-5 w-5" />
+            </div>
+            <h3 className="font-display text-lg font-bold uppercase tracking-wide text-primary">
+              Competiciones
+            </h3>
+            <p className="text-xs font-medium leading-relaxed text-secondary">
+              Ligas oficiales, copas y torneos amistosos.
             </p>
           </div>
         </Link>
@@ -235,8 +265,8 @@ export default async function AdminDashboardPage() {
               className="py-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-center min-w-0"
             >
               <div className="flex items-center gap-4 min-w-0 flex-1">
-                <Badge variant={match.competition} dot>
-                  {getCompetitionLabel(match.competition)}
+                <Badge variant={match.competition_ref?.type || match.competition} dot>
+                  {match.competition_ref?.name || getCompetitionLabel(match.competition)}
                 </Badge>
                 <div className="min-w-0 flex-1">
                   <h4 className="truncate font-display text-lg font-bold text-primary">

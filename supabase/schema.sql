@@ -45,11 +45,20 @@ CREATE TABLE IF NOT EXISTS fields (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 5. Tabla de Partidos
+-- 5. Tabla de Competiciones (Ligas, Copas, Torneos, Amistosos)
+CREATE TABLE IF NOT EXISTS competitions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    type competition_type NOT NULL DEFAULT 'liga',
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 6. Tabla de Partidos
 CREATE TABLE IF NOT EXISTS matches (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     rival_id UUID NOT NULL REFERENCES rivals(id) ON DELETE RESTRICT,
     field_id UUID REFERENCES fields(id) ON DELETE SET NULL,
+    competition_id UUID REFERENCES competitions(id) ON DELETE SET NULL,
     is_home BOOLEAN NOT NULL DEFAULT true,
     match_date TIMESTAMPTZ NOT NULL,
     competition competition_type NOT NULL DEFAULT 'liga',
@@ -60,7 +69,7 @@ CREATE TABLE IF NOT EXISTS matches (
     updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 5. Tabla de Actas / Estadísticas por Jugador en Cada Partido
+-- 7. Tabla de Actas / Estadísticas por Jugador en Cada Partido
 CREATE TABLE IF NOT EXISTS match_player_stats (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     match_id UUID NOT NULL REFERENCES matches(id) ON DELETE CASCADE,
@@ -74,7 +83,7 @@ CREATE TABLE IF NOT EXISTS match_player_stats (
     UNIQUE(match_id, player_id)
 );
 
--- 6. Vista de Estadísticas Acumuladas
+-- 8. Vista de Estadísticas Acumuladas
 CREATE OR REPLACE VIEW player_stats_summary AS
 SELECT 
     p.id AS player_id,
@@ -97,10 +106,11 @@ LEFT JOIN match_player_stats mps ON p.id = mps.player_id
 LEFT JOIN matches m ON mps.match_id = m.id AND m.psg_score IS NOT NULL
 GROUP BY p.id;
 
--- 7. Seguridad: Habilitar RLS en todas las tablas
+-- 9. Seguridad: Habilitar RLS en todas las tablas
 ALTER TABLE players ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rivals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE fields ENABLE ROW LEVEL SECURITY;
+ALTER TABLE competitions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE matches ENABLE ROW LEVEL SECURITY;
 ALTER TABLE match_player_stats ENABLE ROW LEVEL SECURITY;
 
@@ -112,6 +122,9 @@ CREATE POLICY "Acceso público de lectura a rivales" ON rivals
     FOR SELECT USING (true);
 
 CREATE POLICY "Acceso público de lectura a campos" ON fields
+    FOR SELECT USING (true);
+
+CREATE POLICY "Acceso público de lectura a competiciones" ON competitions
     FOR SELECT USING (true);
 
 CREATE POLICY "Acceso público de lectura a partidos" ON matches
@@ -128,6 +141,9 @@ CREATE POLICY "Escritura autenticada para rivales" ON rivals
     FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
 CREATE POLICY "Escritura autenticada para campos" ON fields
+    FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+CREATE POLICY "Escritura autenticada para competiciones" ON competitions
     FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
 CREATE POLICY "Escritura autenticada para partidos" ON matches

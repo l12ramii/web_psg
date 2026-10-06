@@ -61,8 +61,8 @@ export default async function AdminPartidosPage() {
 
                 <div className="space-y-1.5 min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant={match.competition} dot>
-                      {getCompetitionLabel(match.competition)}
+                    <Badge variant={match.competition_ref?.type || match.competition} dot>
+                      {match.competition_ref?.name || getCompetitionLabel(match.competition)}
                     </Badge>
                     <span className="font-display text-xs font-bold uppercase text-secondary">
                       {match.is_home ? "Local" : "Visitante"}

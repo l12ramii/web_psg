@@ -3,15 +3,55 @@ import {
   Player,
   Rival,
   Field,
+  Competition,
+  CompetitionType,
   MatchWithRival,
   PlayerStatsSummary,
   MatchDetail,
+  Match,
 } from "./supabase/types";
 import { sortPlayersByPositionAndDorsal } from "./utils";
 
 // ==========================================
 // QUERIES (Lecturas desde Supabase)
 // ==========================================
+
+export async function getCompetitions(): Promise<Competition[]> {
+  try {
+    const supabase = createClient();
+    const { data, error } = await (supabase.from("competitions") as any)
+      .select("*")
+      .order("name", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching competitions from Supabase:", error.message);
+      return [];
+    }
+    return (data as Competition[]) || [];
+  } catch (err) {
+    console.error("Unexpected error in getCompetitions:", err);
+    return [];
+  }
+}
+
+export async function getCompetitionById(id: string): Promise<Competition | null> {
+  try {
+    const supabase = createClient();
+    const { data, error } = await (supabase.from("competitions") as any)
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      console.error("Error fetching competition by id from Supabase:", error.message);
+      return null;
+    }
+    return data as Competition;
+  } catch (err) {
+    console.error("Unexpected error in getCompetitionById:", err);
+    return null;
+  }
+}
 
 export async function getFields(): Promise<Field[]> {
   try {
@@ -132,7 +172,7 @@ export async function getMatches(): Promise<MatchWithRival[]> {
   try {
     const supabase = createClient();
     const { data, error } = await (supabase.from("matches") as any)
-      .select("*, rival:rivals(*), field:fields(*)")
+      .select("*, rival:rivals(*), field:fields(*), competition_ref:competitions(*)")
       .order("match_date", { ascending: true });
 
     if (error) {
@@ -185,7 +225,7 @@ export async function getMatchById(id: string): Promise<MatchDetail | null> {
   try {
     const supabase = createClient();
     const { data: matchData, error: matchError } = await (supabase.from("matches") as any)
-      .select("*, rival:rivals(*), field:fields(*)")
+      .select("*, rival:rivals(*), field:fields(*), competition_ref:competitions(*)")
       .eq("id", id)
       .single();
 
@@ -415,9 +455,69 @@ export async function deleteField(id: string): Promise<boolean> {
   return true;
 }
 
+export async function addCompetition(data: {
+  name: string;
+  type: CompetitionType;
+}): Promise<Competition> {
+  const supabase = createClient();
+  const { data: newCompetition, error } = await (supabase.from("competitions") as any)
+    .insert({
+      name: data.name,
+      type: data.type,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error adding competition to Supabase:", error.message);
+    throw error;
+  }
+  return newCompetition as Competition;
+}
+
+export async function updateCompetition(
+  id: string,
+  data: Partial<Competition>
+): Promise<Competition | null> {
+  const supabase = createClient();
+  const { data: updatedCompetition, error } = await (supabase.from("competitions") as any)
+    .update(data)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error updating competition in Supabase:", error.message);
+    throw error;
+  }
+  return updatedCompetition as Competition;
+}
+
+export async function deleteCompetition(id: string): Promise<boolean> {
+  const supabase = createClient();
+  const { error } = await (supabase.from("competitions") as any)
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error("Error deleting competition in Supabase:", error.message);
+    if (
+      error.code === "23503" ||
+      error.message?.includes("violates foreign key constraint")
+    ) {
+      throw new Error(
+        "No se puede eliminar esta competición porque tiene partidos asignados en el calendario."
+      );
+    }
+    throw error;
+  }
+  return true;
+}
+
 export async function addMatch(data: {
   rival_id: string;
   field_id?: string | null;
+  competition_id?: string | null;
   is_home: boolean;
   match_date: string;
   competition: "liga" | "copa" | "amistoso";
@@ -427,11 +527,12 @@ export async function addMatch(data: {
     .insert({
       rival_id: data.rival_id,
       field_id: data.field_id || null,
+      competition_id: data.competition_id || null,
       is_home: data.is_home,
       match_date: data.match_date,
       competition: data.competition,
     })
-    .select("*, rival:rivals(*), field:fields(*)")
+    .select("*, rival:rivals(*), field:fields(*), competition_ref:competitions(*)")
     .single();
 
   if (error) {
@@ -439,6 +540,49 @@ export async function addMatch(data: {
     throw error;
   }
   return newMatch as MatchWithRival;
+}
+
+export async function updateMatch(
+  id: string,
+  data: Partial<{
+    rival_id: string;
+    field_id: string | null;
+    competition_id: string | null;
+    is_home: boolean;
+    match_date: string;
+    competition: "liga" | "copa" | "amistoso";
+    psg_score: number | null;
+    rival_score: number | null;
+  }>
+): Promise<MatchWithRival | null> {
+  const supabase = createClient();
+  const { data: updatedMatch, error } = await (supabase.from("matches") as any)
+    .update({
+      ...data,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id)
+    .select("*, rival:rivals(*), field:fields(*), competition_ref:competitions(*)")
+    .single();
+
+  if (error) {
+    console.error("Error updating match in Supabase:", error.message);
+    throw error;
+  }
+  return updatedMatch as MatchWithRival;
+}
+
+export async function deleteMatch(id: string): Promise<boolean> {
+  const supabase = createClient();
+  const { error } = await (supabase.from("matches") as any)
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error("Error deleting match in Supabase:", error.message);
+    throw error;
+  }
+  return true;
 }
 
 export async function saveMatchSheet(

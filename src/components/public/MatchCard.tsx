@@ -104,8 +104,8 @@ export function MatchCard({ match, showActaButton = true }: MatchCardProps) {
         {/* Header Bar */}
         <div className="mb-4 flex items-center justify-between gap-2 border-b border-white/10 pb-3">
           <div className="flex flex-wrap items-center gap-2 min-w-0">
-            <Badge variant={match.competition} dot>
-              {getCompetitionLabel(match.competition)}
+            <Badge variant={match.competition_ref?.type || match.competition} dot>
+              {match.competition_ref?.name || getCompetitionLabel(match.competition)}
             </Badge>
             <span className="font-display text-xs font-bold uppercase tracking-wider text-secondary">
               {match.is_home ? "Local" : "Visitante"}
@@ -253,8 +253,8 @@ export function MatchCard({ match, showActaButton = true }: MatchCardProps) {
           {/* Match Scoreline Card - Symmetrical 3-Column Layout */}
           <div className="space-y-4 rounded-xl border border-white/10 bg-surface-elevated/40 p-4 sm:p-6 text-center">
             <div className="flex items-center justify-between border-b border-white/10 pb-2 font-display text-xs font-bold uppercase tracking-wider text-secondary">
-              <Badge variant={match.competition} dot>
-                {getCompetitionLabel(match.competition)}
+              <Badge variant={match.competition_ref?.type || match.competition} dot>
+                {match.competition_ref?.name || getCompetitionLabel(match.competition)}
               </Badge>
               <span className="truncate ml-2">{formatMatchDate(match.match_date)}</span>
             </div>

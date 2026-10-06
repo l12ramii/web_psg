@@ -14,17 +14,20 @@ import {
   Loader2,
   MapPin,
 } from "lucide-react";
-import { getRivals, getFields, addMatch } from "@/lib/data";
-import { Rival, Field } from "@/lib/supabase/types";
+import { getRivals, getFields, getCompetitions, addMatch } from "@/lib/data";
+import { Rival, Field, Competition } from "@/lib/supabase/types";
 import { Button } from "@/components/ui/Button";
 import { RivalShield } from "@/components/ui/RivalShield";
+import { Trophy } from "lucide-react";
 
 export default function NuevoPartidoPage() {
   const router = useRouter();
   const [rivals, setRivals] = useState<Rival[]>([]);
   const [fields, setFields] = useState<Field[]>([]);
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [rivalId, setRivalId] = useState<string>("");
   const [fieldId, setFieldId] = useState<string>("");
+  const [competitionId, setCompetitionId] = useState<string>("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isHome, setIsHome] = useState<boolean>(true);
   const [matchDate, setMatchDate] = useState<string>("");
@@ -34,6 +37,7 @@ export default function NuevoPartidoPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loadingRivals, setLoadingRivals] = useState<boolean>(true);
   const [loadingFields, setLoadingFields] = useState<boolean>(true);
+  const [loadingCompetitions, setLoadingCompetitions] = useState<boolean>(true);
 
   useEffect(() => {
     const d = new Date();
@@ -60,10 +64,30 @@ export default function NuevoPartidoPage() {
       .finally(() => {
         setLoadingFields(false);
       });
+
+    getCompetitions()
+      .then((data) => {
+        setCompetitions(data);
+        if (data.length > 0) {
+          setCompetitionId(data[0].id);
+          setCompetition(data[0].type);
+        }
+      })
+      .finally(() => {
+        setLoadingCompetitions(false);
+      });
   }, []);
 
   const selectedRival = rivals.find((r) => r.id === rivalId);
   const selectedField = fields.find((f) => f.id === fieldId);
+
+  const handleCompetitionSelect = (selectedId: string) => {
+    setCompetitionId(selectedId);
+    const compObj = competitions.find((c) => c.id === selectedId);
+    if (compObj) {
+      setCompetition(compObj.type);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,6 +101,7 @@ export default function NuevoPartidoPage() {
       await addMatch({
         rival_id: rivalId,
         field_id: fieldId || null,
+        competition_id: competitionId || null,
         is_home: isHome,
         match_date: new Date(matchDate).toISOString(),
         competition,
@@ -306,18 +331,58 @@ export default function NuevoPartidoPage() {
 
           {/* Competición */}
           <div className="space-y-2">
-            <label className="block font-display text-xs font-bold uppercase tracking-wider text-secondary">
-              Competición
-            </label>
-            <select
-              value={competition}
-              onChange={(e) => setCompetition(e.target.value as any)}
-              className="w-full rounded-xl border border-white/10 bg-surface-elevated px-4 py-3 text-sm font-medium text-primary focus-ring focus:border-accent-cyan focus:outline-none"
-            >
-              <option value="liga">Liga Oficial F7</option>
-              <option value="copa">Copa</option>
-              <option value="amistoso">Partido Amistoso</option>
-            </select>
+            <div className="flex items-center justify-between">
+              <label className="font-display text-xs font-bold uppercase tracking-wider text-secondary flex items-center gap-1.5">
+                <Trophy className="h-3.5 w-3.5 text-warning" />
+                Competición / Torneo *
+              </label>
+              <Link
+                href="/admin/competiciones"
+                className="flex items-center gap-1 font-display text-xs font-bold uppercase tracking-wider text-accent-cyan hover:underline"
+              >
+                <Plus className="h-3.5 w-3.5" /> Gestionar competiciones
+              </Link>
+            </div>
+
+            {loadingCompetitions ? (
+              <div className="flex items-center gap-2 p-3 text-xs text-secondary">
+                <Loader2 className="h-4 w-4 animate-spin text-accent-cyan" />
+                <span>Cargando competiciones...</span>
+              </div>
+            ) : competitions.length > 0 ? (
+              <select
+                value={competitionId}
+                onChange={(e) => handleCompetitionSelect(e.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-surface-elevated px-4 py-3 text-sm font-medium text-primary focus-ring focus:border-accent-cyan focus:outline-none"
+              >
+                {competitions.map((comp) => (
+                  <option key={comp.id} value={comp.id}>
+                    {comp.name} ({comp.type.toUpperCase()})
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className="space-y-2">
+                <select
+                  value={competition}
+                  onChange={(e) => setCompetition(e.target.value as any)}
+                  className="w-full rounded-xl border border-white/10 bg-surface-elevated px-4 py-3 text-sm font-medium text-primary focus-ring focus:border-accent-cyan focus:outline-none"
+                >
+                  <option value="liga">Liga Oficial F7</option>
+                  <option value="copa">Copa F7</option>
+                  <option value="amistoso">Partido Amistoso</option>
+                </select>
+                <p className="text-[11px] text-muted">
+                  No hay competiciones personalizadas registradas aún.{" "}
+                  <Link
+                    href="/admin/competiciones"
+                    className="text-accent-cyan underline font-bold"
+                  >
+                    Crear una competición
+                  </Link>
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Action Buttons */}

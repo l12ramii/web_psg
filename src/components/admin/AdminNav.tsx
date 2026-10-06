@@ -9,6 +9,7 @@ import {
   Users,
   Shield,
   MapPin,
+  Trophy,
   LogOut,
   Flame,
   Menu,
@@ -30,6 +31,7 @@ export function AdminNav() {
     { href: "/admin/jugadores", label: "Plantilla", icon: Users },
     { href: "/admin/rivales", label: "Rivales", icon: Shield },
     { href: "/admin/campos", label: "Campos", icon: MapPin },
+    { href: "/admin/competiciones", label: "Competiciones", icon: Trophy },
   ];
 
   const handleLogout = async () => {

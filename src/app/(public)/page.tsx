@@ -157,8 +157,8 @@ export default async function HomePage() {
                   </h3>
                 </div>
                 {nextMatch && (
-                  <Badge variant={nextMatch.competition} dot>
-                    {getCompetitionLabel(nextMatch.competition)}
+                  <Badge variant={nextMatch.competition_ref?.type || nextMatch.competition} dot>
+                    {nextMatch.competition_ref?.name || getCompetitionLabel(nextMatch.competition)}
                   </Badge>
                 )}
               </div>
@@ -277,8 +277,8 @@ export default async function HomePage() {
                   </h3>
                 </div>
                 {lastResult && (
-                  <Badge variant={lastResult.competition} dot>
-                    {getCompetitionLabel(lastResult.competition)}
+                  <Badge variant={lastResult.competition_ref?.type || lastResult.competition} dot>
+                    {lastResult.competition_ref?.name || getCompetitionLabel(lastResult.competition)}
                   </Badge>
                 )}
               </div>

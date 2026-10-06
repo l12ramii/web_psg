@@ -9,21 +9,23 @@ import {
   Search,
   Loader2,
 } from "lucide-react";
-import { MatchWithRival } from "@/lib/supabase/types";
+import { MatchWithRival, Competition } from "@/lib/supabase/types";
 import { MatchCard } from "@/components/public/MatchCard";
-import { getMatches } from "@/lib/data";
+import { getMatches, getCompetitions } from "@/lib/data";
 
 export default function PartidosPage() {
   const [matches, setMatches] = useState<MatchWithRival[]>([]);
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"todos" | "proximos" | "finalizados">("todos");
   const [competitionFilter, setCompetitionFilter] = useState<string>("todas");
   const [searchRival, setSearchRival] = useState("");
 
   useEffect(() => {
-    getMatches()
-      .then((data) => {
-        setMatches(data);
+    Promise.all([getMatches(), getCompetitions()])
+      .then(([matchesData, compsData]) => {
+        setMatches(matchesData);
+        setCompetitions(compsData);
       })
       .finally(() => {
         setLoading(false);
@@ -34,8 +36,16 @@ export default function PartidosPage() {
     if (tab === "proximos" && m.is_finished) return false;
     if (tab === "finalizados" && !m.is_finished) return false;
 
-    if (competitionFilter !== "todas" && m.competition !== competitionFilter) {
-      return false;
+    if (competitionFilter !== "todas") {
+      const matchCompId = m.competition_id;
+      const matchCompType = m.competition;
+      if (
+        matchCompId !== competitionFilter &&
+        matchCompType !== competitionFilter &&
+        m.competition_ref?.name !== competitionFilter
+      ) {
+        return false;
+      }
     }
 
     if (searchRival.trim()) {
@@ -137,9 +147,19 @@ export default function PartidosPage() {
               className="w-full cursor-pointer rounded-xl border border-white/10 bg-surface-elevated px-3 py-2 font-display text-xs font-bold uppercase text-primary focus-ring focus:border-accent-cyan focus:outline-none sm:w-auto"
             >
               <option value="todas">Todas las Competiciones</option>
-              <option value="liga">Liga Oficial F7</option>
-              <option value="copa">Copa F7</option>
-              <option value="amistoso">Amistosos</option>
+              {competitions.length > 0 ? (
+                competitions.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))
+              ) : (
+                <>
+                  <option value="liga">Liga Oficial F7</option>
+                  <option value="copa">Copa F7</option>
+                  <option value="amistoso">Amistosos</option>
+                </>
+              )}
             </select>
           </div>
         </div>

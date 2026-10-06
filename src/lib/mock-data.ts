@@ -2,9 +2,31 @@ import {
   Player,
   Rival,
   Field,
+  Competition,
   MatchWithRival,
   PlayerStatsSummary,
 } from "./supabase/types";
+
+export const initialCompetitions: Competition[] = [
+  {
+    id: "competition-1",
+    name: "Liga Apertura Fútbol 7",
+    type: "liga",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "competition-2",
+    name: "Copa de Primavera",
+    type: "copa",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "competition-3",
+    name: "Torneo Amistoso Pretemporada",
+    type: "amistoso",
+    created_at: new Date().toISOString(),
+  },
+];
 
 export const initialFields: Field[] = [
   {
@@ -232,6 +254,7 @@ export const initialMatches: MatchWithRival[] = [
     id: "match-1",
     rival_id: "rival-1",
     field_id: "field-1",
+    competition_id: "competition-1",
     is_home: true,
     match_date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
     competition: "liga",
@@ -242,11 +265,13 @@ export const initialMatches: MatchWithRival[] = [
     updated_at: new Date().toISOString(),
     rival: initialRivals[0],
     field: initialFields[0],
+    competition_ref: initialCompetitions[0],
   },
   {
     id: "match-2",
     rival_id: "rival-2",
     field_id: "field-2",
+    competition_id: "competition-1",
     is_home: false,
     match_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
     competition: "liga",
@@ -257,11 +282,13 @@ export const initialMatches: MatchWithRival[] = [
     updated_at: new Date().toISOString(),
     rival: initialRivals[1],
     field: initialFields[1],
+    competition_ref: initialCompetitions[0],
   },
   {
     id: "match-3",
     rival_id: "rival-3",
     field_id: "field-1",
+    competition_id: "competition-1",
     is_home: true,
     // Next upcoming match in 3 days 18:00
     match_date: new Date(
@@ -275,11 +302,13 @@ export const initialMatches: MatchWithRival[] = [
     updated_at: new Date().toISOString(),
     rival: initialRivals[2],
     field: initialFields[0],
+    competition_ref: initialCompetitions[0],
   },
   {
     id: "match-4",
     rival_id: "rival-4",
     field_id: "field-3",
+    competition_id: "competition-2",
     is_home: false,
     match_date: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),
     competition: "copa",
@@ -290,6 +319,7 @@ export const initialMatches: MatchWithRival[] = [
     updated_at: new Date().toISOString(),
     rival: initialRivals[3],
     field: initialFields[2],
+    competition_ref: initialCompetitions[1],
   },
 ];
 

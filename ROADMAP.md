@@ -83,11 +83,11 @@ Este documento detalla las tareas paso a paso para completar el desarrollo de la
   - [x] Crear sección `/admin/campos` (Listado, Alta, Edición, Borrado).
   - [x] Modificar tabla `matches` añadiendo `field_id`.
   - [x] Adaptar selector en `/admin/partidos/nuevo` y visor público de partidos.
-- [ ] **2. CRUD de Competiciones (`competitions`)**
-  - [ ] Crear esquema SQL: Tabla `competitions` (`id`, `name`, `type`) y migración de la tabla `matches`.
-  - [ ] Actualizar base de datos y tipos en frontend.
-  - [ ] Crear sección `/admin/competiciones` (CRUD).
-  - [ ] Adaptar creación y edición de partidos para seleccionar la competición real.
+- [x] **2. CRUD de Competiciones (`competitions`)**
+  - [x] Crear esquema SQL: Tabla `competitions` (`id`, `name`, `type`) y migración de la tabla `matches`.
+  - [x] Actualizar base de datos y tipos en frontend.
+  - [x] Crear sección `/admin/competiciones` (CRUD).
+  - [x] Adaptar creación y edición de partidos para seleccionar la competición real.
 - [ ] **3. Página Pública y Filtro de Estadísticas**
   - [ ] Crear página `/estadisticas` con tablas (Pichichi, Asistencias, Zamora, Tarjetas).
   - [ ] Desarrollar selector global de competición (Todas, Amistosos, Ligas...).

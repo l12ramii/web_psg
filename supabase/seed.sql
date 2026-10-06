@@ -18,7 +18,14 @@ INSERT INTO fields (id, name, address, maps_url) VALUES
 ('44444444-4444-4444-4444-444444444403', 'Complejo Deportivo Las Palmeras', 'Calle Olivo 22, Madrid', 'https://maps.google.com/?q=Complejo+Deportivo+Las+Palmeras')
 ON CONFLICT (id) DO NOTHING;
 
--- 3. Insertar Plantilla PSG F7
+-- 3. Insertar Competiciones
+INSERT INTO competitions (id, name, type) VALUES
+('55555555-5555-5555-5555-555555555501', 'Liga Apertura Fútbol 7', 'liga'),
+('55555555-5555-5555-5555-555555555502', 'Copa de Primavera', 'copa'),
+('55555555-5555-5555-5555-555555555503', 'Torneo Amistoso Pretemporada', 'amistoso')
+ON CONFLICT (id) DO NOTHING;
+
+-- 4. Insertar Plantilla PSG F7
 -- Porteros
 INSERT INTO players (id, first_name, last_name, nickname, dorsal, position, photo_url, is_active) VALUES
 ('22222222-2222-2222-2222-222222222201', 'Álvaro', 'Ramos', 'El Muro', 1, 'portero', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80', true),
@@ -44,25 +51,25 @@ INSERT INTO players (id, first_name, last_name, nickname, dorsal, position, phot
 ('22222222-2222-2222-2222-222222222213', 'Manuel', 'Torres', 'Manu', 0, 'utillero', 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=300&auto=format&fit=crop&q=80', true)
 ON CONFLICT (id) DO NOTHING;
 
--- 4. Insertar Partidos
+-- 5. Insertar Partidos
 -- Partido 1 (Finalizado: Victoria PSG 4-2)
-INSERT INTO matches (id, rival_id, field_id, is_home, match_date, competition, psg_score, rival_score) VALUES
-('33333333-3333-3333-3333-333333333301', '11111111-1111-1111-1111-111111111101', '44444444-4444-4444-4444-444444444401', true, now() - INTERVAL '14 days', 'liga', 4, 2)
+INSERT INTO matches (id, rival_id, field_id, competition_id, is_home, match_date, competition, psg_score, rival_score) VALUES
+('33333333-3333-3333-3333-333333333301', '11111111-1111-1111-1111-111111111101', '44444444-4444-4444-4444-444444444401', '55555555-5555-5555-5555-555555555501', true, now() - INTERVAL '14 days', 'liga', 4, 2)
 ON CONFLICT (id) DO NOTHING;
 
 -- Partido 2 (Finalizado: Victoria PSG 3-0 - Portería a Cero)
-INSERT INTO matches (id, rival_id, field_id, is_home, match_date, competition, psg_score, rival_score) VALUES
-('33333333-3333-3333-3333-333333333302', '11111111-1111-1111-1111-111111111102', '44444444-4444-4444-4444-444444444402', false, now() - INTERVAL '7 days', 'liga', 3, 0)
+INSERT INTO matches (id, rival_id, field_id, competition_id, is_home, match_date, competition, psg_score, rival_score) VALUES
+('33333333-3333-3333-3333-333333333302', '11111111-1111-1111-1111-111111111102', '44444444-4444-4444-4444-444444444402', '55555555-5555-5555-5555-555555555501', false, now() - INTERVAL '7 days', 'liga', 3, 0)
 ON CONFLICT (id) DO NOTHING;
 
 -- Partido 3 (Próximo Partido)
-INSERT INTO matches (id, rival_id, field_id, is_home, match_date, competition, psg_score, rival_score) VALUES
-('33333333-3333-3333-3333-333333333303', '11111111-1111-1111-1111-111111111103', '44444444-4444-4444-4444-444444444401', true, now() + INTERVAL '3 days 4 hours', 'liga', NULL, NULL)
+INSERT INTO matches (id, rival_id, field_id, competition_id, is_home, match_date, competition, psg_score, rival_score) VALUES
+('33333333-3333-3333-3333-333333333303', '11111111-1111-1111-1111-111111111103', '44444444-4444-4444-4444-444444444401', '55555555-5555-5555-5555-555555555501', true, now() + INTERVAL '3 days 4 hours', 'liga', NULL, NULL)
 ON CONFLICT (id) DO NOTHING;
 
 -- Partido 4 (Futuro Partido - Copa)
-INSERT INTO matches (id, rival_id, field_id, is_home, match_date, competition, psg_score, rival_score) VALUES
-('33333333-3333-3333-3333-333333333304', '11111111-1111-1111-1111-111111111104', '44444444-4444-4444-4444-444444444403', false, now() + INTERVAL '10 days', 'copa', NULL, NULL)
+INSERT INTO matches (id, rival_id, field_id, competition_id, is_home, match_date, competition, psg_score, rival_score) VALUES
+('33333333-3333-3333-3333-333333333304', '11111111-1111-1111-1111-111111111104', '44444444-4444-4444-4444-444444444403', '55555555-5555-5555-5555-555555555502', false, now() + INTERVAL '10 days', 'copa', NULL, NULL)
 ON CONFLICT (id) DO NOTHING;
 
 -- 5. Insertar Actas de Partidos Finalizados

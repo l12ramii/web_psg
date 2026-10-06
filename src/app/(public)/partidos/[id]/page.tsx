@@ -85,8 +85,8 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
       <div className="relative space-y-6 overflow-hidden rounded-xl border border-white/10 bg-surface p-6 text-center shadow-xl inner-light sm:p-10">
         <div className="flex flex-col items-center justify-between gap-4 border-b border-white/10 pb-4 sm:flex-row">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={match.competition} dot>
-              {getCompetitionLabel(match.competition)}
+            <Badge variant={match.competition_ref?.type || match.competition} dot>
+              {match.competition_ref?.name || getCompetitionLabel(match.competition)}
             </Badge>
             <span className="font-display text-xs font-bold uppercase text-secondary">
               {match.is_home ? "Local" : "Visitante"}

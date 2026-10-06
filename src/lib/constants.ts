@@ -68,3 +68,4 @@ export const SOCIAL_LINKS_LIST: SocialLink[] = [
   SOCIAL_LINKS.twitch,
   SOCIAL_LINKS.youtube,
 ];
+

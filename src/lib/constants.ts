@@ -28,8 +28,8 @@ export const SOCIAL_LINKS: Record<"instagram" | "twitch" | "youtube", SocialLink
   instagram: {
     id: "instagram",
     name: "Instagram",
-    handle: "@psgf7_oficial",
-    url: process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://instagram.com/psgf7_oficial",
+    handle: "@__psg_8",
+    url: process.env.NEXT_PUBLIC_INSTAGRAM_URL?.trim() || "https://instagram.com/__psg_8",
     description: "Fotos oficiales de partidos, convocatorias, mejores jugadas y la actualidad del vestuario en tiempo real.",
     badge: "Fotos & Reels",
     color: "#E1306C",
@@ -40,8 +40,8 @@ export const SOCIAL_LINKS: Record<"instagram" | "twitch" | "youtube", SocialLink
   twitch: {
     id: "twitch",
     name: "Twitch",
-    handle: "psgf7_tv",
-    url: process.env.NEXT_PUBLIC_TWITCH_URL || "https://twitch.tv/psgf7_tv",
+    handle: "team_psg_",
+    url: process.env.NEXT_PUBLIC_TWITCH_URL?.trim() || "https://twitch.tv/team_psg_",
     description: "Retransmisiones en directo de nuestros partidos, tertulias con los jugadores y análisis táctico post-partido.",
     badge: "Directos en Vivo",
     color: "#9146FF",
@@ -52,8 +52,8 @@ export const SOCIAL_LINKS: Record<"instagram" | "twitch" | "youtube", SocialLink
   youtube: {
     id: "youtube",
     name: "YouTube",
-    handle: "@PSGFutbol7",
-    url: process.env.NEXT_PUBLIC_YOUTUBE_URL || "https://youtube.com/@PSGFutbol7",
+    handle: "@PSG_FC8",
+    url: process.env.NEXT_PUBLIC_YOUTUBE_URL?.trim() || "https://youtube.com/@PSG_FC8",
     description: "Resúmenes en alta definición, goles de la jornada, paradas decisivas y recopilatorios de la temporada.",
     badge: "Highlights & Goles",
     color: "#FF0000",

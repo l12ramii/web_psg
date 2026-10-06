@@ -39,7 +39,9 @@ export default function NuevoPartidoPage() {
     const d = new Date();
     d.setDate(d.getDate() + ((6 - d.getDay() + 7) % 7 || 7));
     d.setHours(18, 0, 0, 0);
-    setMatchDate(d.toISOString().slice(0, 16));
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    const localDateString = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    setMatchDate(localDateString);
 
     getRivals()
       .then((data) => {

@@ -9,26 +9,63 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatMatchDate(dateString: string): string {
+  if (!dateString) return "";
   try {
     const date =
-      typeof dateString === "string"
-        ? parseISO(dateString)
-        : new Date(dateString);
-    return format(date, "EEEE, d 'de' MMMM · HH:mm 'hs'", { locale: es });
+      typeof dateString === "string" ? new Date(dateString) : dateString;
+    if (isNaN(date.getTime())) return String(dateString);
+
+    const formatter = new Intl.DateTimeFormat("es-ES", {
+      timeZone: "Europe/Madrid",
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    const parts = formatter.formatToParts(date);
+    const map: Record<string, string> = {};
+    parts.forEach((p) => {
+      map[p.type] = p.value;
+    });
+
+    const weekday = map.weekday
+      ? map.weekday.charAt(0).toUpperCase() + map.weekday.slice(1)
+      : "";
+    return `${weekday}, ${map.day} de ${map.month} · ${map.hour}:${map.minute} hs`;
   } catch {
-    return dateString;
+    return String(dateString);
   }
 }
 
 export function formatShortDate(dateString: string): string {
+  if (!dateString) return "";
   try {
     const date =
-      typeof dateString === "string"
-        ? parseISO(dateString)
-        : new Date(dateString);
-    return format(date, "dd/MM/yyyy · HH:mm", { locale: es });
+      typeof dateString === "string" ? new Date(dateString) : dateString;
+    if (isNaN(date.getTime())) return String(dateString);
+
+    const formatter = new Intl.DateTimeFormat("es-ES", {
+      timeZone: "Europe/Madrid",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    const parts = formatter.formatToParts(date);
+    const map: Record<string, string> = {};
+    parts.forEach((p) => {
+      map[p.type] = p.value;
+    });
+
+    return `${map.day}/${map.month}/${map.year} · ${map.hour}:${map.minute}`;
   } catch {
-    return dateString;
+    return String(dateString);
   }
 }
 

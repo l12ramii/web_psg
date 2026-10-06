@@ -278,6 +278,13 @@ export async function getMatches(): Promise<MatchWithRival[]> {
       .order("match_date", { ascending: true });
 
     if (error) {
+      // Fallback si las tablas de competiciones/campos aún no se han creado en Supabase
+      const fallback = await (supabase.from("matches") as any)
+        .select("*, rival:rivals(*)")
+        .order("match_date", { ascending: true });
+      if (!fallback.error && fallback.data) {
+        return fallback.data as MatchWithRival[];
+      }
       console.error("Error fetching matches from Supabase:", error.message);
       return [];
     }
@@ -326,14 +333,25 @@ export async function getLastResult(): Promise<MatchWithRival | null> {
 export async function getMatchById(id: string): Promise<MatchDetail | null> {
   try {
     const supabase = createClient();
-    const { data: matchData, error: matchError } = await (supabase.from("matches") as any)
+    let matchData: any = null;
+    const { data, error: matchError } = await (supabase.from("matches") as any)
       .select("*, rival:rivals(*), field:fields(*), competition_ref:competitions(*)")
       .eq("id", id)
       .single();
 
-    if (matchError || !matchData) {
-      console.error("Error fetching match by id from Supabase:", matchError?.message);
-      return null;
+    if (matchError || !data) {
+      // Fallback sin las tablas opcionales fields/competitions
+      const fallback = await (supabase.from("matches") as any)
+        .select("*, rival:rivals(*)")
+        .eq("id", id)
+        .single();
+      if (fallback.error || !fallback.data) {
+        console.error("Error fetching match by id from Supabase:", fallback.error?.message || matchError?.message);
+        return null;
+      }
+      matchData = fallback.data;
+    } else {
+      matchData = data;
     }
 
     const { data: statsData, error: statsError } = await (supabase.from("match_player_stats") as any)
@@ -625,16 +643,18 @@ export async function addMatch(data: {
   competition: "liga" | "copa" | "amistoso";
 }): Promise<MatchWithRival> {
   const supabase = createClient();
+  const insertPayload: any = {
+    rival_id: data.rival_id,
+    is_home: data.is_home,
+    match_date: data.match_date,
+    competition: data.competition,
+  };
+  if (data.field_id) insertPayload.field_id = data.field_id;
+  if (data.competition_id) insertPayload.competition_id = data.competition_id;
+
   const { data: newMatch, error } = await (supabase.from("matches") as any)
-    .insert({
-      rival_id: data.rival_id,
-      field_id: data.field_id || null,
-      competition_id: data.competition_id || null,
-      is_home: data.is_home,
-      match_date: data.match_date,
-      competition: data.competition,
-    })
-    .select("*, rival:rivals(*), field:fields(*), competition_ref:competitions(*)")
+    .insert(insertPayload)
+    .select("*, rival:rivals(*)")
     .single();
 
   if (error) {
@@ -664,7 +684,7 @@ export async function updateMatch(
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
-    .select("*, rival:rivals(*), field:fields(*), competition_ref:competitions(*)")
+    .select("*, rival:rivals(*)")
     .single();
 
   if (error) {

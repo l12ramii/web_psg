@@ -14,7 +14,8 @@ import {
   Trophy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PsgShield } from "@/components/ui";
+import { PsgShield, SocialIcon } from "@/components/ui";
+import { SOCIAL_LINKS_LIST } from "@/lib/constants";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -30,16 +31,33 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-background/80 backdrop-blur-xl">
       {/* Top micro-bar */}
-      <div className="hidden w-full border-b border-white/5 bg-surface/50 px-4 py-1 font-display text-[11px] uppercase tracking-widest text-secondary sm:block">
+      <div className="hidden w-full border-b border-white/5 bg-surface/50 px-4 py-1.5 font-display text-[11px] uppercase tracking-widest text-secondary sm:block">
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-success" />
             <span>Temporada Regular 2026/27 · PSG Fútbol 7 Oficial</span>
           </div>
-          <div className="flex items-center gap-4 font-bold text-accent-cyan">
-            <span className="flex items-center gap-1">
+          <div className="flex items-center gap-5">
+            <div className="flex items-center gap-3">
+              {SOCIAL_LINKS_LIST.map((social) => (
+                <a
+                  key={social.id}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Visitar ${social.name} oficial`}
+                  className="flex items-center gap-1 text-secondary transition-colors hover:text-accent-cyan"
+                  title={`${social.name}: ${social.handle}`}
+                >
+                  <SocialIcon network={social.id} size={13} />
+                  <span className="font-semibold lowercase tracking-normal">{social.handle}</span>
+                </a>
+              ))}
+            </div>
+            <span className="h-3 w-[1px] bg-white/10" />
+            <div className="flex items-center gap-1 font-bold text-accent-cyan">
               <Flame className="h-3 w-3 text-accent-cyan" /> Resurgimiento y Garra
-            </span>
+            </div>
           </div>
         </div>
       </div>
@@ -93,8 +111,25 @@ export function Navbar() {
           })}
         </nav>
 
-        {/* Right CTA: Backoffice CM */}
-        <div className="flex items-center gap-3">
+        {/* Right CTA: Social icons + Backoffice CM */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Social Quick Links on Desktop */}
+          <div className="hidden lg:flex items-center gap-1 rounded-xl border border-white/10 bg-surface p-1">
+            {SOCIAL_LINKS_LIST.map((social) => (
+              <a
+                key={social.id}
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={social.name}
+                title={`${social.name} (${social.handle})`}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-secondary transition-all duration-200 hover:bg-surface-elevated hover:text-accent-cyan focus-ring"
+              >
+                <SocialIcon network={social.id} size={15} />
+              </a>
+            ))}
+          </div>
+
           <Link
             href="/admin"
             className="flex items-center gap-2 rounded-xl border border-white/10 bg-surface-elevated px-4 py-2 font-display text-xs font-bold uppercase tracking-wider text-primary transition-all duration-200 hover:-translate-y-1 hover:border-accent-cyan/50 hover:text-accent-cyan hover:shadow-glow-subtle focus-ring"
@@ -120,28 +155,52 @@ export function Navbar() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="animate-in slide-in-from-top-4 space-y-2 border-t border-white/10 bg-surface/95 px-4 pb-6 pt-3 backdrop-blur-2xl duration-200 md:hidden">
-          {navLinks.map((link) => {
-            const Icon = link.icon;
-            const isActive = pathname === link.href;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className={cn(
-                  "flex items-center gap-3 rounded-xl px-4 py-3 font-display text-sm font-bold uppercase tracking-wider transition-colors",
-                  isActive
-                    ? "border border-accent-cyan/40 bg-surface-elevated text-primary shadow-glow-subtle"
-                    : "text-secondary hover:bg-surface-elevated/60 hover:text-primary"
-                )}
-              >
-                <Icon className="h-5 w-5 text-accent-cyan" />
-                {link.label}
-              </Link>
-            );
-          })}
-          <div className="border-t border-white/10 pt-3">
+        <div className="animate-in slide-in-from-top-4 space-y-3 border-t border-white/10 bg-surface/95 px-4 pb-6 pt-3 backdrop-blur-2xl duration-200 md:hidden">
+          <div className="space-y-1">
+            {navLinks.map((link) => {
+              const Icon = link.icon;
+              const isActive = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 rounded-xl px-4 py-3 font-display text-sm font-bold uppercase tracking-wider transition-colors",
+                    isActive
+                      ? "border border-accent-cyan/40 bg-surface-elevated text-primary shadow-glow-subtle"
+                      : "text-secondary hover:bg-surface-elevated/60 hover:text-primary"
+                  )}
+                >
+                  <Icon className="h-5 w-5 text-accent-cyan" />
+                  {link.label}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Mobile Social Links */}
+          <div className="rounded-xl border border-white/10 bg-surface-elevated/60 p-3">
+            <span className="block font-display text-[10px] font-bold uppercase tracking-widest text-secondary mb-2 px-1">
+              Redes Sociales Oficiales
+            </span>
+            <div className="grid grid-cols-3 gap-2">
+              {SOCIAL_LINKS_LIST.map((social) => (
+                <a
+                  key={social.id}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-surface py-2.5 text-secondary transition-colors hover:border-accent-cyan/50 hover:text-primary"
+                >
+                  <SocialIcon network={social.id} size={18} />
+                  <span className="font-display text-[11px] font-bold uppercase tracking-wider">{social.name}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-white/10 pt-2">
             <Link
               href="/admin"
               onClick={() => setMobileMenuOpen(false)}
@@ -155,3 +214,4 @@ export function Navbar() {
     </header>
   );
 }
+

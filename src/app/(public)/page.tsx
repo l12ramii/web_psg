@@ -21,6 +21,7 @@ import {
 import { CountdownTimer } from "@/components/public/CountdownTimer";
 import { StatLeaders } from "@/components/public/StatLeaders";
 import { MatchCard } from "@/components/public/MatchCard";
+import { SocialBanner } from "@/components/public/SocialBanner";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { PsgShield } from "@/components/ui/PsgShield";
@@ -351,7 +352,10 @@ export default async function HomePage() {
         />
       </section>
 
-      {/* 4. CLUB IDENTITY & VALUES */}
+      {/* 4. SOCIAL MEDIA & MULTIMEDIA HUB */}
+      <SocialBanner />
+
+      {/* 5. CLUB IDENTITY & VALUES */}
       <section className="container mx-auto px-4">
         <div className="relative mx-auto max-w-4xl space-y-6 overflow-hidden rounded-xl border border-white/10 bg-surface p-8 text-center inner-light sm:p-14">
           {/* Tiger Claw Slash SVG Watermark */}

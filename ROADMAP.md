@@ -93,7 +93,8 @@ Este documento detalla las tareas paso a paso para completar el desarrollo de la
   - [x] Desarrollar selector global de competición (Todas, Amistosos, Ligas...).
   - [x] Integrar filtro dinámico en `/estadisticas`, la página `/plantilla` y los líderes de la Home.
   - [x] Modificar vistas SQL o funciones RPC de Supabase para calcular las estadísticas agrupadas y filtrables por competición.
-- [ ] **4. Integración de Redes Sociales**
-  - [ ] Añadir archivo de configuración/constantes para IG, Twitch y YouTube.
-  - [ ] Incorporar enlaces con iconos en `Navbar` y `Footer`.
-  - [ ] Diseñar y añadir un bloque/banner destacado en la página de inicio (Home).
+- [x] **4. Integración de Redes Sociales**
+  - [x] Añadir archivo de configuración/constantes para IG, Twitch y YouTube.
+  - [x] Incorporar enlaces con iconos en `Navbar` y `Footer`.
+  - [x] Diseñar y añadir un bloque/banner destacado en la página de inicio (Home).
+

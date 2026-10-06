@@ -17,7 +17,7 @@ export const CLUB_INFO = {
   slogan: "Fuerza · Resurgimiento · Garra",
   motto: "El Fénix Nunca se Rinde",
   season: "Temporada Regular 2026/27",
-  category: "Fútbol 7 Aficionado",
+  category: "Fútbol 7 Amateur",
 } as const;
 
 /**

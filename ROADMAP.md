@@ -88,11 +88,11 @@ Este documento detalla las tareas paso a paso para completar el desarrollo de la
   - [x] Actualizar base de datos y tipos en frontend.
   - [x] Crear sección `/admin/competiciones` (CRUD).
   - [x] Adaptar creación y edición de partidos para seleccionar la competición real.
-- [ ] **3. Página Pública y Filtro de Estadísticas**
-  - [ ] Crear página `/estadisticas` con tablas (Pichichi, Asistencias, Zamora, Tarjetas).
-  - [ ] Desarrollar selector global de competición (Todas, Amistosos, Ligas...).
-  - [ ] Integrar filtro dinámico en `/estadisticas`, la página `/plantilla` y los líderes de la Home.
-  - [ ] Modificar vistas SQL o funciones RPC de Supabase para calcular las estadísticas agrupadas y filtrables por competición.
+- [x] **3. Página Pública y Filtro de Estadísticas**
+  - [x] Crear página `/estadisticas` con tablas (Pichichi, Asistencias, Zamora, Tarjetas).
+  - [x] Desarrollar selector global de competición (Todas, Amistosos, Ligas...).
+  - [x] Integrar filtro dinámico en `/estadisticas`, la página `/plantilla` y los líderes de la Home.
+  - [x] Modificar vistas SQL o funciones RPC de Supabase para calcular las estadísticas agrupadas y filtrables por competición.
 - [ ] **4. Integración de Redes Sociales**
   - [ ] Añadir archivo de configuración/constantes para IG, Twitch y YouTube.
   - [ ] Incorporar enlaces con iconos en `Navbar` y `Footer`.

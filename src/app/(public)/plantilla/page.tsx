@@ -12,10 +12,11 @@ import {
   Target,
   Briefcase,
 } from "lucide-react";
-import { getPlayerStatsSummary } from "@/lib/data";
+import { getPlayerStatsSummary, getCompetitions } from "@/lib/data";
 import { PlayerCard } from "@/components/public/PlayerCard";
-import { PlayerPosition, PlayerStatsSummary } from "@/lib/supabase/types";
-import { sortPlayersByPositionAndDorsal } from "@/lib/utils";
+import { CompetitionSelector } from "@/components/public/CompetitionSelector";
+import { PlayerPosition, PlayerStatsSummary, Competition } from "@/lib/supabase/types";
+import { sortPlayersByPositionAndDorsal, getCompetitionLabel } from "@/lib/utils";
 
 type FilterTab = "todos" | "cuerpo-tecnico" | "portero" | "defensa" | "medio" | "delantero";
 
@@ -73,19 +74,37 @@ const POSITION_SECTIONS: PositionSectionConfig[] = [
 
 export default function PlantillaPage() {
   const [players, setPlayers] = useState<PlayerStatsSummary[]>([]);
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [competitionFilter, setCompetitionFilter] = useState<string>("todas");
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<FilterTab>("todos");
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    getPlayerStatsSummary()
+    Promise.all([
+      getPlayerStatsSummary(competitionFilter),
+      getCompetitions(),
+    ])
+      .then(([playersData, compsData]) => {
+        setPlayers(sortPlayersByPositionAndDorsal(playersData));
+        setCompetitions(compsData);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [competitionFilter]);
+
+  const handleCompetitionChange = (newComp: string) => {
+    setCompetitionFilter(newComp);
+    setLoading(true);
+    getPlayerStatsSummary(newComp)
       .then((data) => {
         setPlayers(sortPlayersByPositionAndDorsal(data));
       })
       .finally(() => {
         setLoading(false);
       });
-  }, []);
+  };
 
   const tabOptions: { key: FilterTab; label: string }[] = [
     { key: "todos", label: "Toda la Plantilla" },
@@ -155,57 +174,68 @@ export default function PlantillaPage() {
         </p>
       </div>
 
-      {/* Control Panel: Segmented Tabs & Search Bar */}
-      <div className="flex flex-col items-center justify-between gap-4 rounded-xl border border-white/10 bg-surface p-4 inner-light backdrop-blur-md md:flex-row">
-        {/* Segmented Position Tabs (Mobile Responsive Wrap & Desktop Single Line) */}
-        <div className="flex w-full flex-wrap sm:flex-nowrap items-center gap-1.5 rounded-lg border border-white/10 bg-surface-elevated/60 p-1.5 md:w-auto max-w-full overflow-x-auto">
-          {tabOptions.map((tab) => {
-            const count =
-              tab.key === "todos"
-                ? activePlayers.length
-                : tab.key === "cuerpo-tecnico"
-                ? activePlayers.filter(
-                    (p) => p.position === "entrenador" || p.position === "utillero"
-                  ).length
-                : activePlayers.filter((p) => p.position === tab.key).length;
+      {/* Control Panel: Segmented Tabs & Filters */}
+      <div className="flex flex-col gap-4 rounded-xl border border-white/10 bg-surface p-4 inner-light backdrop-blur-md">
+        <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
+          {/* Segmented Position Tabs (Mobile Responsive Wrap & Desktop Single Line) */}
+          <div className="flex w-full flex-wrap sm:flex-nowrap items-center gap-1.5 rounded-lg border border-white/10 bg-surface-elevated/60 p-1.5 lg:w-auto max-w-full overflow-x-auto">
+            {tabOptions.map((tab) => {
+              const count =
+                tab.key === "todos"
+                  ? activePlayers.length
+                  : tab.key === "cuerpo-tecnico"
+                  ? activePlayers.filter(
+                      (p) => p.position === "entrenador" || p.position === "utillero"
+                    ).length
+                  : activePlayers.filter((p) => p.position === tab.key).length;
 
-            const isActive = activeTab === tab.key;
+              const isActive = activeTab === tab.key;
 
-            return (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`flex flex-1 sm:flex-initial items-center justify-center gap-2 whitespace-nowrap rounded-md px-3 py-2 font-display text-xs font-bold uppercase tracking-wider transition-all duration-200 focus-ring ${
-                  isActive
-                    ? "border border-accent-cyan/40 bg-surface-elevated text-primary shadow-glow-subtle"
-                    : "text-secondary hover:bg-surface-elevated/60 hover:text-primary"
-                }`}
-              >
-                <span>{tab.label}</span>
-                <span
-                  className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`flex flex-1 sm:flex-initial items-center justify-center gap-2 whitespace-nowrap rounded-md px-3 py-2 font-display text-xs font-bold uppercase tracking-wider transition-all duration-200 focus-ring ${
                     isActive
-                      ? "bg-accent-cyan/20 text-accent-cyan"
-                      : "bg-surface text-secondary"
+                      ? "border border-accent-cyan/40 bg-surface-elevated text-primary shadow-glow-subtle"
+                      : "text-secondary hover:bg-surface-elevated/60 hover:text-primary"
                   }`}
                 >
-                  {count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+                  <span>{tab.label}</span>
+                  <span
+                    className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                      isActive
+                        ? "bg-accent-cyan/20 text-accent-cyan"
+                        : "bg-surface text-secondary"
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
 
-        {/* Live Search Input */}
-        <div className="relative w-full md:w-72">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-          <input
-            type="text"
-            placeholder="Buscar por apodo, nombre o dorsal..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-surface-elevated/60 py-2.5 pl-10 pr-4 text-sm font-medium text-primary placeholder-muted transition-colors focus-ring focus:border-accent-cyan focus:outline-none"
-          />
+          {/* Right Controls: Competition Filter and Live Search */}
+          <div className="flex w-full flex-col items-center gap-3 sm:flex-row lg:w-auto">
+            <CompetitionSelector
+              competitions={competitions}
+              value={competitionFilter}
+              onChange={handleCompetitionChange}
+              className="w-full sm:w-60"
+            />
+
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+              <input
+                type="text"
+                placeholder="Buscar por apodo, nombre o dorsal..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-surface-elevated/60 py-2.5 pl-10 pr-4 text-xs font-medium text-primary placeholder-muted transition-colors focus-ring focus:border-accent-cyan focus:outline-none"
+              />
+            </div>
+          </div>
         </div>
       </div>
 

@@ -76,6 +76,14 @@ export function Footer() {
                   Calendario & Marcadores
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/estadisticas"
+                  className="transition-colors hover:text-accent-cyan"
+                >
+                  Estadísticas & Rankings
+                </Link>
+              </li>
             </ul>
           </div>
 

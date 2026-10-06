@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   Flame,
+  Trophy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PsgShield } from "@/components/ui";
@@ -23,6 +24,7 @@ export function Navbar() {
     { href: "/", label: "Inicio", icon: Shield },
     { href: "/plantilla", label: "Plantilla", icon: Users },
     { href: "/partidos", label: "Calendario & Resultados", icon: Calendar },
+    { href: "/estadisticas", label: "Estadísticas", icon: Trophy },
   ];
 
   return (

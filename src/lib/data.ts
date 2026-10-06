@@ -9,6 +9,7 @@ import {
   PlayerStatsSummary,
   MatchDetail,
   Match,
+  MatchPlayerStat,
 } from "./supabase/types";
 import { sortPlayersByPositionAndDorsal } from "./utils";
 
@@ -126,9 +127,110 @@ export async function getPlayers(): Promise<Player[]> {
   }
 }
 
-export async function getPlayerStatsSummary(): Promise<PlayerStatsSummary[]> {
+export async function getPlayerStatsSummary(
+  competitionFilter?: string | null
+): Promise<PlayerStatsSummary[]> {
   try {
     const supabase = createClient();
+    const isFiltered = Boolean(competitionFilter && competitionFilter !== "todas");
+
+    if (isFiltered && competitionFilter) {
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        competitionFilter
+      );
+      const isType = ["liga", "copa", "amistoso"].includes(competitionFilter);
+
+      // 1. Intentar RPC de Supabase
+      try {
+        const { data: rpcData, error: rpcError } = await (supabase.rpc as any)(
+          "get_player_stats_by_competition",
+          {
+            p_competition_id: isUUID ? competitionFilter : null,
+            p_competition_type: isType ? competitionFilter : null,
+          }
+        );
+
+        if (!rpcError && rpcData && Array.isArray(rpcData) && rpcData.length > 0) {
+          const formatted = (rpcData as PlayerStatsSummary[]).map((p) => ({
+            ...p,
+            goals_conceded: p.goals_conceded ?? 0,
+          }));
+          return sortPlayersByPositionAndDorsal(formatted);
+        }
+      } catch (rpcErr) {
+        // Continuar al cálculo fallback
+      }
+
+      // 2. Fallback: Calcular estadísticas filtradas agregando actas y partidos
+      const [players, matches, statsRes] = await Promise.all([
+        getPlayers(),
+        getMatches(),
+        (supabase.from("match_player_stats") as any).select("*"),
+      ]);
+
+      const allStats: MatchPlayerStat[] = statsRes?.data || [];
+      const filteredMatches = matches.filter((m) => {
+        if (!m.is_finished) return false;
+        if (isUUID) return m.competition_id === competitionFilter;
+        if (isType) return m.competition === competitionFilter || m.competition_ref?.type === competitionFilter;
+        return (
+          m.competition_id === competitionFilter ||
+          m.competition === competitionFilter ||
+          m.competition_ref?.name === competitionFilter
+        );
+      });
+
+      const matchIds = new Set(filteredMatches.map((m) => m.id));
+      const matchMap = new Map(filteredMatches.map((m) => [m.id, m]));
+
+      const calculatedSummary: PlayerStatsSummary[] = players.map((p) => {
+        const playerStats = allStats.filter(
+          (s) => s.player_id === p.id && matchIds.has(s.match_id)
+        );
+
+        const playedStats = playerStats.filter((s) => s.played);
+        const matchesPlayed = playedStats.length;
+        const totalGoals = playerStats.reduce((acc, s) => acc + (s.goals || 0), 0);
+        const totalAssists = playerStats.reduce((acc, s) => acc + (s.assists || 0), 0);
+        const totalYellowCards = playerStats.reduce((acc, s) => acc + (s.yellow_cards || 0), 0);
+        const totalRedCards = playerStats.reduce((acc, s) => acc + (s.red_cards || 0), 0);
+        const totalCleanSheets = p.position === "portero"
+          ? playerStats.filter((s) => s.clean_sheet).length
+          : 0;
+        
+        let goalsConceded = 0;
+        if (p.position === "portero") {
+          for (const s of playedStats) {
+            const m = matchMap.get(s.match_id);
+            if (m && typeof m.rival_score === "number") {
+              goalsConceded += m.rival_score;
+            }
+          }
+        }
+
+        return {
+          player_id: p.id,
+          first_name: p.first_name,
+          last_name: p.last_name,
+          nickname: p.nickname,
+          dorsal: p.dorsal,
+          position: p.position,
+          photo_url: p.photo_url,
+          is_active: p.is_active,
+          matches_played: matchesPlayed,
+          total_goals: totalGoals,
+          total_assists: totalAssists,
+          total_yellow_cards: totalYellowCards,
+          total_red_cards: totalRedCards,
+          total_clean_sheets: totalCleanSheets,
+          goals_conceded: goalsConceded,
+        };
+      });
+
+      return sortPlayersByPositionAndDorsal(calculatedSummary);
+    }
+
+    // Consulta estándar global sin filtro de competición
     const { data, error } = await (supabase.from("player_stats_summary") as any)
       .select("*")
       .order("dorsal", { ascending: true });
@@ -252,8 +354,8 @@ export async function getMatchById(id: string): Promise<MatchDetail | null> {
   }
 }
 
-export async function getStatLeaders() {
-  const allStats = await getPlayerStatsSummary();
+export async function getStatLeaders(competitionFilter?: string | null) {
+  const allStats = await getPlayerStatsSummary(competitionFilter);
 
   if (!allStats || allStats.length === 0) {
     return {
@@ -282,8 +384,8 @@ export async function getStatLeaders() {
     .sort((a, b) => (b.total_clean_sheets || 0) - (a.total_clean_sheets || 0))[0];
 
   return {
-    topScorer: topScorer?.total_goals > 0 ? topScorer : stats[0] || null,
-    topAssistant: topAssistant?.total_assists > 0 ? topAssistant : stats[0] || null,
+    topScorer: (topScorer?.total_goals ?? 0) > 0 ? topScorer : stats[0] || null,
+    topAssistant: (topAssistant?.total_assists ?? 0) > 0 ? topAssistant : stats[0] || null,
     topKeeper: topKeeper || stats.find((p) => p.position === "portero") || stats[0] || null,
   };
 }

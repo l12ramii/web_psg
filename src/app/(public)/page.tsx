@@ -16,6 +16,7 @@ import {
   getStatLeaders,
   getMatches,
   getPlayers,
+  getCompetitions,
 } from "@/lib/data";
 import { CountdownTimer } from "@/components/public/CountdownTimer";
 import { StatLeaders } from "@/components/public/StatLeaders";
@@ -34,6 +35,7 @@ export default async function HomePage() {
   const leaders = await getStatLeaders();
   const allMatches = await getMatches();
   const allPlayers = await getPlayers();
+  const competitions = await getCompetitions();
 
   const finishedMatches = allMatches.filter((m) => m.is_finished);
   const totalGoals = finishedMatches.reduce(
@@ -327,17 +329,25 @@ export default async function HomePage() {
               <span className="text-warning">Honor</span>
             </h2>
           </div>
-          <Link href="/plantilla">
-            <Button variant="outline" size="sm">
-              Ver Todos los Jugadores
-            </Button>
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            <Link href="/estadisticas">
+              <Button size="sm" className="shadow-glow-subtle">
+                <Trophy className="h-4 w-4" /> Ver Tablas y Rankings
+              </Button>
+            </Link>
+            <Link href="/plantilla">
+              <Button variant="outline" size="sm">
+                Ver Plantilla
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <StatLeaders
           topScorer={leaders.topScorer}
           topAssistant={leaders.topAssistant}
           topKeeper={leaders.topKeeper}
+          competitions={competitions}
         />
       </section>
 

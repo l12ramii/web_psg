@@ -106,6 +106,56 @@ LEFT JOIN match_player_stats mps ON p.id = mps.player_id
 LEFT JOIN matches m ON mps.match_id = m.id AND m.psg_score IS NOT NULL
 GROUP BY p.id;
 
+-- 8.1. Función RPC para Estadísticas Filtrables por Competición
+CREATE OR REPLACE FUNCTION get_player_stats_by_competition(
+    p_competition_id UUID DEFAULT NULL,
+    p_competition_type competition_type DEFAULT NULL
+)
+RETURNS TABLE (
+    player_id UUID,
+    first_name TEXT,
+    last_name TEXT,
+    nickname TEXT,
+    dorsal INTEGER,
+    position player_position,
+    photo_url TEXT,
+    is_active BOOLEAN,
+    matches_played BIGINT,
+    total_goals INTEGER,
+    total_assists INTEGER,
+    total_yellow_cards INTEGER,
+    total_red_cards INTEGER,
+    total_clean_sheets INTEGER,
+    goals_conceded INTEGER
+) LANGUAGE sql STABLE AS $$
+SELECT 
+    p.id AS player_id,
+    p.first_name,
+    p.last_name,
+    p.nickname,
+    p.dorsal,
+    p.position,
+    p.photo_url,
+    p.is_active,
+    COUNT(mps.id) FILTER (WHERE mps.played = true) AS matches_played,
+    COALESCE(SUM(mps.goals), 0)::INTEGER AS total_goals,
+    COALESCE(SUM(mps.assists), 0)::INTEGER AS total_assists,
+    COALESCE(SUM(mps.yellow_cards), 0)::INTEGER AS total_yellow_cards,
+    COALESCE(SUM(mps.red_cards), 0)::INTEGER AS total_red_cards,
+    COUNT(mps.id) FILTER (WHERE mps.clean_sheet = true AND p.position = 'portero')::INTEGER AS total_clean_sheets,
+    COALESCE(SUM(m.rival_score) FILTER (WHERE mps.played = true AND p.position = 'portero'), 0)::INTEGER AS goals_conceded
+FROM players p
+LEFT JOIN match_player_stats mps ON p.id = mps.player_id
+LEFT JOIN matches m ON mps.match_id = m.id 
+    AND m.psg_score IS NOT NULL 
+    AND (
+        (p_competition_id IS NULL AND p_competition_type IS NULL) OR
+        (p_competition_id IS NOT NULL AND m.competition_id = p_competition_id) OR
+        (p_competition_type IS NOT NULL AND (m.competition = p_competition_type OR EXISTS (SELECT 1 FROM competitions c WHERE c.id = m.competition_id AND c.type = p_competition_type)))
+    )
+GROUP BY p.id;
+$$;
+
 -- 9. Seguridad: Habilitar RLS en todas las tablas
 ALTER TABLE players ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rivals ENABLE ROW LEVEL SECURITY;

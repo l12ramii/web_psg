@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { MatchWithRival, Competition } from "@/lib/supabase/types";
 import { MatchCard } from "@/components/public/MatchCard";
+import { CompetitionSelector } from "@/components/public/CompetitionSelector";
 import { getMatches, getCompetitions } from "@/lib/data";
 
 export default function PartidosPage() {
@@ -139,29 +140,12 @@ export default function PartidosPage() {
           </div>
 
           {/* Competition select */}
-          <div className="flex w-full items-center gap-2 sm:w-auto">
-            <Filter className="h-4 w-4 text-muted" />
-            <select
-              value={competitionFilter}
-              onChange={(e) => setCompetitionFilter(e.target.value)}
-              className="w-full cursor-pointer rounded-xl border border-white/10 bg-surface-elevated px-3 py-2 font-display text-xs font-bold uppercase text-primary focus-ring focus:border-accent-cyan focus:outline-none sm:w-auto"
-            >
-              <option value="todas">Todas las Competiciones</option>
-              {competitions.length > 0 ? (
-                competitions.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))
-              ) : (
-                <>
-                  <option value="liga">Liga Oficial F7</option>
-                  <option value="copa">Copa F7</option>
-                  <option value="amistoso">Amistosos</option>
-                </>
-              )}
-            </select>
-          </div>
+          <CompetitionSelector
+            competitions={competitions}
+            value={competitionFilter}
+            onChange={setCompetitionFilter}
+            className="w-full sm:w-60"
+          />
         </div>
       </div>
 
